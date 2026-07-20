@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="完全在浏览器本地运行的像素画优化、调色板提取与精灵图集分析工具。">
   <title>PIXEL FORGE · 本地像素优化</title>
-  <link rel="stylesheet" href="styles.css?v=20260720-palette">
+  <link rel="stylesheet" href="styles.css?v=20260720-ui2">
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -14,7 +14,7 @@
         <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <div>
           <div class="brand-name">PIXEL <span>FORGE</span></div>
-          <div class="brand-sub">LOCAL STUDIO · V1.0</div>
+          <div class="brand-sub">LOCAL PIXEL STUDIO</div>
         </div>
       </div>
       <nav class="topnav" aria-label="工具导航">
@@ -25,7 +25,7 @@
       </nav>
       <div class="top-actions">
         <span class="local-badge"><b></b> 本地处理</span>
-        <button id="themeButton" class="icon-text-button" type="button" title="切换外观">⚡ <span>赛博</span></button>
+        <button id="themeButton" class="icon-text-button" type="button" title="切换外观">◐ <span>墨夜</span></button>
       </div>
     </header>
 
@@ -33,7 +33,7 @@
       <aside class="history-rail" aria-label="本地记录">
         <div class="rail-head">
           <span class="section-icon">▱</span>
-          <span>本地记录</span>
+          <span>最近项目</span>
           <button id="refreshHistory" class="icon-button" type="button" title="刷新记录">↻</button>
         </div>
         <div class="rail-tools">
@@ -51,7 +51,11 @@
         <button id="collapseControl" class="panel-handle left-handle" type="button" title="收起参数面板">‹</button>
         <div class="panel-scroll">
           <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden>
-          <button id="uploadButton" class="upload-strip" type="button"><span>⇧</span> 上传像素画</button>
+          <div class="panel-heading">
+            <div><small>01 / PROCESS</small><h2>优化设置</h2></div>
+            <span>本地运行</span>
+          </div>
+          <button id="uploadButton" class="upload-strip" type="button"><span>＋</span> 导入图片</button>
 
           <div class="segmented" role="tablist" aria-label="处理模式">
             <button id="autoModeButton" class="active" type="button" role="tab" aria-selected="true">自动模式</button>
@@ -91,7 +95,7 @@
           </section>
 
           <section class="control-section pipeline-section">
-            <div class="section-kicker">流程参数</div>
+            <div class="section-kicker">优化参数</div>
 
             <div class="process-control">
               <div class="control-line">
@@ -142,7 +146,7 @@
 
             <label id="reconstructRow" class="check-label reconstruct-row" hidden><input id="reconstructToggle" type="checkbox" checked><span class="fake-check"></span>物理重构</label>
 
-            <button id="runPipelineButton" class="primary-action" type="button" disabled><span>▶</span><span>执行全部流程</span></button>
+            <button id="runPipelineButton" class="primary-action" type="button" disabled><span>✦</span><span>生成优化结果</span></button>
             <div id="processStatus" class="process-status"><i></i><span>等待图片</span></div>
           </section>
 
@@ -174,18 +178,22 @@
       </aside>
 
       <main id="stage" class="stage">
+        <div class="stage-title">
+          <span>预览画布</span>
+          <small>滚轮缩放 · 按住中键拖动</small>
+        </div>
         <div class="stage-tabs" role="tablist" aria-label="预览图层">
-          <button id="originalTab" class="active" type="button" role="tab" aria-selected="true">原始</button>
-          <button id="resultTab" type="button" role="tab" aria-selected="false">结果 <i id="resultDot"></i></button>
+          <button id="originalTab" class="active" type="button" role="tab" aria-selected="true">原图</button>
+          <button id="resultTab" type="button" role="tab" aria-selected="false">优化后 <i id="resultDot"></i></button>
         </div>
         <div id="dropZone" class="canvas-viewport">
           <div id="emptyState" class="empty-state">
             <div class="upload-cube"><span>▧</span><i></i></div>
-            <h2>上传像素画</h2>
-            <p>点击或拖放图片到这里</p>
-            <span>支持 PNG / JPG / WEBP / GIF / SVG · 文件仅在本机处理</span>
+            <h2>开始优化像素图</h2>
+            <p>拖放图片，或从本机选择文件</p>
+            <span>PNG · JPG · WEBP · GIF · SVG，文件不会上传</span>
             <button id="emptyUploadButton" type="button">选择图片</button>
-            <button id="demoButton" type="button">载入示例</button>
+            <button id="demoButton" type="button">使用示例</button>
           </div>
           <div id="canvasScene" class="canvas-scene" hidden>
             <div id="canvasBackdrop" class="canvas-backdrop solid">
@@ -209,6 +217,10 @@
       <aside id="analysisPanel" class="analysis-panel">
         <button id="collapseAnalysis" class="panel-handle right-handle" type="button" title="收起分析面板">›</button>
         <div class="analysis-scroll">
+          <div class="panel-heading">
+            <div><small>02 / INSPECT</small><h2>结果分析</h2></div>
+            <span>实时更新</span>
+          </div>
           <div class="analysis-mode-banner" aria-hidden="true">
             <span>◈ 调色板分析</span>
             <small>当前预览 · 自动提取</small>
@@ -216,7 +228,7 @@
 
           <div class="export-grid">
             <button id="exportButton" class="export-button primary" type="button" disabled><span>⇩</span> 导出 PNG</button>
-            <button id="exportOnePxButton" class="export-button" type="button" disabled><span>▧</span> 导出 1px</button>
+            <button id="exportOnePxButton" class="export-button" type="button" disabled><span>▧</span> 1× 像素版</button>
           </div>
 
           <div class="grid-settings">
@@ -268,6 +280,6 @@
       <p>提示：开启“吸管抠图”后点击画布，可移除相近背景色；描边会基于透明边缘生成。</p>
     </dialog>
   </div>
-  <script src="app.js?v=20260720-palette"></script>
+  <script src="app.js?v=20260720-ui2"></script>
 </body>
 </html>

@@ -1143,6 +1143,26 @@
     };
 
     const useOverlayPanels = () => window.matchMedia("(max-width: 780px)").matches;
+    let overlayPanelLayout = false;
+
+    const syncResponsivePanels = () => {
+      const overlay = useOverlayPanels();
+      if (overlay === overlayPanelLayout) return;
+      overlayPanelLayout = overlay;
+      if (overlay) {
+        const paletteActive = paletteNavItem.classList.contains("active");
+        if (paletteActive) {
+          collapsePanel($("#controlPanel"), $("#collapseControl"), "›");
+          expandPanel($("#analysisPanel"), $("#collapseAnalysis"), "›");
+        } else {
+          expandPanel($("#controlPanel"), $("#collapseControl"), "‹");
+          collapsePanel($("#analysisPanel"), $("#collapseAnalysis"), "‹");
+        }
+      } else {
+        expandPanel($("#controlPanel"), $("#collapseControl"), "‹");
+        expandPanel($("#analysisPanel"), $("#collapseAnalysis"), "›");
+      }
+    };
 
     const focusPanelTarget = (navItem, panel, handle, expandedGlyph, target) => {
       activateTopNav(navItem);
@@ -1324,7 +1344,7 @@
     });
     $("#themeButton").addEventListener("click", () => {
       document.body.classList.toggle("graphite");
-      $("#themeButton span").textContent = document.body.classList.contains("graphite") ? "石墨" : "赛博";
+      $("#themeButton span").textContent = document.body.classList.contains("graphite") ? "石墨" : "墨夜";
     });
 
     optimizerNavItem.addEventListener("click", () => {
@@ -1354,7 +1374,11 @@
     $('[data-close-dialog]').addEventListener("click", () => helpDialog.close());
     helpDialog.addEventListener("close", () => activateTopNav(lastWorkspaceNavItem, false));
 
-    window.addEventListener("resize", () => { if (state.originalData) renderDisplay(); });
+    syncResponsivePanels();
+    window.addEventListener("resize", () => {
+      syncResponsivePanels();
+      if (state.originalData) renderDisplay();
+    });
   }
 
   async function initialize() {

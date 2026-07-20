@@ -1105,6 +1105,37 @@
 
   function bindEvents() {
     const fileInput = $("#fileInput");
+    const topNavItems = $$(".topnav .nav-item");
+    const optimizerNavItem = $('[data-action="focus-optimizer"]');
+    const atlasNavItem = $('[data-action="focus-atlas"]');
+    const paletteNavItem = $('[data-action="focus-palette"]');
+    const helpNavItem = $('[data-action="open-help"]');
+    const helpDialog = $("#helpDialog");
+    let lastWorkspaceNavItem = optimizerNavItem;
+
+    const activateTopNav = (activeItem, remember = true) => {
+      topNavItems.forEach(item => {
+        const active = item === activeItem;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      if (remember) lastWorkspaceNavItem = activeItem;
+      activeItem.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    };
+
+    const expandPanel = (panel, handle, expandedGlyph) => {
+      if (!panel.classList.contains("collapsed")) return;
+      panel.classList.remove("collapsed");
+      handle.textContent = expandedGlyph;
+      setTimeout(renderDisplay, 260);
+    };
+
+    const focusPanelTarget = (navItem, panel, handle, expandedGlyph, target) => {
+      activateTopNav(navItem);
+      expandPanel(panel, handle, expandedGlyph);
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     const openFile = () => fileInput.click();
     ["#uploadButton", "#emptyUploadButton", "#openUploadFromRail"].forEach(selector => $(selector).addEventListener("click", openFile));
     fileInput.addEventListener("change", () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); fileInput.value = ""; });
@@ -1277,12 +1308,23 @@
       $("#themeButton span").textContent = document.body.classList.contains("graphite") ? "石墨" : "赛博";
     });
 
-    $('[data-action="focus-atlas"]').addEventListener("click", () => {
-      $("#atlasToggle").checked = true; updateAtlasSummary(); $("#atlasToggle").scrollIntoView({ behavior: "smooth", block: "center" });
+    optimizerNavItem.addEventListener("click", () => {
+      focusPanelTarget(optimizerNavItem, $("#controlPanel"), $("#collapseControl"), "‹", $("#uploadButton"));
     });
-    $('[data-action="focus-palette"]').addEventListener("click", () => $("#paletteSection").scrollIntoView({ behavior: "smooth", block: "start" }));
-    $('[data-action="open-help"]').addEventListener("click", () => $("#helpDialog").showModal());
-    $('[data-close-dialog]').addEventListener("click", () => $("#helpDialog").close());
+    atlasNavItem.addEventListener("click", () => {
+      $("#atlasToggle").checked = true;
+      updateAtlasSummary();
+      focusPanelTarget(atlasNavItem, $("#controlPanel"), $("#collapseControl"), "‹", $("#atlasToggle").closest(".switch-row"));
+    });
+    paletteNavItem.addEventListener("click", () => {
+      focusPanelTarget(paletteNavItem, $("#analysisPanel"), $("#collapseAnalysis"), "›", $("#paletteSection"));
+    });
+    helpNavItem.addEventListener("click", () => {
+      activateTopNav(helpNavItem, false);
+      if (!helpDialog.open) helpDialog.showModal();
+    });
+    $('[data-close-dialog]').addEventListener("click", () => helpDialog.close());
+    helpDialog.addEventListener("close", () => activateTopNav(lastWorkspaceNavItem, false));
 
     window.addEventListener("resize", () => { if (state.originalData) renderDisplay(); });
   }

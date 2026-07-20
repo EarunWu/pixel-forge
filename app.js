@@ -1163,7 +1163,10 @@
     $("#resultTab").addEventListener("click", () => setView("result"));
     $("#runPipelineButton").addEventListener("click", processImage);
 
-    $("#atlasToggle").addEventListener("change", updateAtlasSummary);
+    $("#atlasToggle").addEventListener("change", () => {
+      updateAtlasSummary();
+      activateTopNav($("#atlasToggle").checked ? atlasNavItem : optimizerNavItem);
+    });
     ["#atlasCols", "#atlasRows"].forEach(selector => $(selector).addEventListener("change", updateAtlasSummary));
     $$('[data-atlas]').forEach(button => button.addEventListener("click", () => {
       const [cols, rows] = button.dataset.atlas.split("x").map(Number);
@@ -1309,6 +1312,8 @@
     });
 
     optimizerNavItem.addEventListener("click", () => {
+      $("#atlasToggle").checked = false;
+      updateAtlasSummary();
       focusPanelTarget(optimizerNavItem, $("#controlPanel"), $("#collapseControl"), "‹", $("#uploadButton"));
     });
     atlasNavItem.addEventListener("click", () => {

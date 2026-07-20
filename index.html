@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="完全在浏览器本地运行的像素画优化、调色板提取与精灵图集分析工具。">
+  <title>PIXEL FORGE · 本地像素优化</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div>
+          <div class="brand-name">PIXEL <span>FORGE</span></div>
+          <div class="brand-sub">LOCAL STUDIO · V1.0</div>
+        </div>
+      </div>
+      <nav class="topnav" aria-label="工具导航">
+        <button class="nav-item active" type="button"><span>✦</span> 像素优化</button>
+        <button class="nav-item" type="button" data-action="focus-atlas"><span>▦</span> Sprite 图集</button>
+        <button class="nav-item" type="button" data-action="focus-palette"><span>◈</span> 调色板</button>
+        <button class="nav-item" type="button" data-action="open-help"><span>?</span> 使用说明</button>
+      </nav>
+      <div class="top-actions">
+        <span class="local-badge"><b></b> 本地处理</span>
+        <button id="themeButton" class="icon-text-button" type="button" title="切换外观">⚡ <span>赛博</span></button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="history-rail" aria-label="本地记录">
+        <div class="rail-head">
+          <span class="section-icon">▱</span>
+          <span>本地记录</span>
+          <button id="refreshHistory" class="icon-button" type="button" title="刷新记录">↻</button>
+        </div>
+        <div class="rail-tools">
+          <button id="pickFolderButton" class="rail-tool active" type="button" title="选择保存文件夹">⌑</button>
+          <button id="openUploadFromRail" class="rail-tool" type="button" title="导入图片">▧</button>
+          <button id="clearHistoryButton" class="rail-tool" type="button" title="清空本地记录">×</button>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="empty-rail"><span>◇</span><p>暂无本地记录</p></div>
+        </div>
+        <div id="folderStatus" class="folder-status"><span>●</span> 默认下载目录</div>
+      </aside>
+
+      <aside id="controlPanel" class="control-panel">
+        <button id="collapseControl" class="panel-handle left-handle" type="button" title="收起参数面板">‹</button>
+        <div class="panel-scroll">
+          <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden>
+          <button id="uploadButton" class="upload-strip" type="button"><span>⇧</span> 上传像素画</button>
+
+          <div class="segmented" role="tablist" aria-label="处理模式">
+            <button id="autoModeButton" class="active" type="button" role="tab" aria-selected="true">自动模式</button>
+            <button id="manualModeButton" type="button" role="tab" aria-selected="false">手动模式</button>
+          </div>
+
+          <div class="switch-row accent-row">
+            <label class="check-label"><input id="atlasToggle" type="checkbox"><span class="fake-check"></span>精灵图集</label>
+            <span id="atlasSummary" class="value-note">单张图片</span>
+          </div>
+
+          <section id="atlasControls" class="control-section atlas-controls" hidden>
+            <div class="inline-pair">
+              <label>列数 <input id="atlasCols" type="number" min="1" max="64" value="2"></label>
+              <label>行数 <input id="atlasRows" type="number" min="1" max="64" value="2"></label>
+            </div>
+            <div class="preset-grid five">
+              <button type="button" data-atlas="2x2">2×2</button>
+              <button type="button" data-atlas="4x4">4×4</button>
+              <button type="button" data-atlas="8x4">8×4</button>
+              <button type="button" data-atlas="4x8">4×8</button>
+              <button type="button" data-atlas="8x8">8×8</button>
+            </div>
+            <div id="atlasCellInfo" class="micro-info">每格 ? × ? px · 共 4 格</div>
+          </section>
+
+          <section id="manualControls" class="control-section manual-controls" hidden>
+            <div class="section-title"><span>格子大小</span><strong><output id="cellSizeOutput">4</output> px</strong></div>
+            <input id="cellSizeRange" class="range" type="range" min="1" max="16" step="1" value="4">
+            <div class="preset-grid five">
+              <button type="button" data-cell-size="1">1</button>
+              <button type="button" data-cell-size="2">2</button>
+              <button class="active" type="button" data-cell-size="4">4</button>
+              <button type="button" data-cell-size="8">8</button>
+              <button type="button" data-cell-size="16">16</button>
+            </div>
+          </section>
+
+          <section class="control-section pipeline-section">
+            <div class="section-kicker">流程参数</div>
+
+            <div class="process-control">
+              <div class="control-line">
+                <label class="check-label"><input id="quantizeToggle" type="checkbox" checked><span class="fake-check"></span>色彩量化</label>
+                <output id="deltaOutput" class="hot-value">ΔE 2</output>
+              </div>
+              <div class="step-range">
+                <button type="button" data-step-target="deltaRange" data-step="-1">−</button>
+                <input id="deltaRange" class="range" type="range" min="0" max="20" step="1" value="2">
+                <button type="button" data-step-target="deltaRange" data-step="1">+</button>
+              </div>
+            </div>
+
+            <div class="process-control">
+              <div class="control-line">
+                <label class="check-label"><input id="regionToggle" type="checkbox" checked><span class="fake-check"></span>区域检测</label>
+                <output id="regionOutput" class="warm-value">1.3</output>
+              </div>
+              <div class="step-range">
+                <button type="button" data-step-target="regionRange" data-step="-0.1">−</button>
+                <input id="regionRange" class="range" type="range" min="0.1" max="10" step="0.1" value="1.3">
+                <button type="button" data-step-target="regionRange" data-step="0.1">+</button>
+              </div>
+            </div>
+
+            <div class="process-control">
+              <div class="control-line">
+                <label class="check-label"><input id="colorsToggle" type="checkbox" checked><span class="fake-check"></span>指定色数</label>
+                <output id="colorsOutput" class="pink-value">512</output>
+              </div>
+              <div class="step-range">
+                <button type="button" data-step-target="colorsRange" data-step="-1" data-index-step>−</button>
+                <input id="colorsRange" class="range" type="range" min="0" max="8" step="1" value="5">
+                <button type="button" data-step-target="colorsRange" data-step="1" data-index-step>+</button>
+              </div>
+              <div id="colorPresets" class="preset-grid colors">
+                <button type="button" data-color-count="16">16</button>
+                <button type="button" data-color-count="32">32</button>
+                <button type="button" data-color-count="64">64</button>
+                <button type="button" data-color-count="128">128</button>
+                <button type="button" data-color-count="256">256</button>
+                <button class="active" type="button" data-color-count="512">512</button>
+                <button type="button" data-color-count="1024">1024</button>
+                <button type="button" data-color-count="2048">2048</button>
+                <button type="button" data-color-count="4096">4096</button>
+              </div>
+            </div>
+
+            <label id="reconstructRow" class="check-label reconstruct-row" hidden><input id="reconstructToggle" type="checkbox" checked><span class="fake-check"></span>物理重构</label>
+
+            <button id="runPipelineButton" class="primary-action" type="button" disabled><span>▶</span><span>执行全部流程</span></button>
+            <div id="processStatus" class="process-status"><i></i><span>等待图片</span></div>
+          </section>
+
+          <button id="eyedropperButton" class="secondary-action" type="button" disabled><span>◉</span> 吸管抠图</button>
+
+          <section class="control-section preview-section">
+            <div class="section-kicker">预览背景</div>
+            <div class="radio-group">
+              <label><input name="previewBg" type="radio" value="none">无</label>
+              <label><input name="previewBg" type="radio" value="grid">网格</label>
+              <label><input name="previewBg" type="radio" value="solid" checked>纯色</label>
+            </div>
+            <label id="previewColorRow" class="color-row"><span>背景颜色</span><input id="previewColor" type="color" value="#0b1720"><input id="previewColorText" type="text" value="#0b1720" maxlength="7"></label>
+          </section>
+
+          <section class="control-section outline-section">
+            <div class="section-kicker">描边</div>
+            <div class="radio-group">
+              <label><input name="outlineMode" type="radio" value="outer">外</label>
+              <label><input name="outlineMode" type="radio" value="center">中</label>
+              <label><input name="outlineMode" type="radio" value="inner" checked>内</label>
+            </div>
+            <label class="color-row"><span>描边颜色</span><input id="outlineColor" type="color" value="#05070d"><input id="outlineColorText" type="text" value="#05070d" maxlength="7"></label>
+            <div class="section-title"><span>大小</span><strong><output id="outlineSizeOutput">1</output> px</strong></div>
+            <input id="outlineSizeRange" class="range" type="range" min="1" max="8" value="1">
+            <button id="outlineButton" class="secondary-action compact" type="button" disabled><span>▣</span> 添加描边</button>
+          </section>
+        </div>
+      </aside>
+
+      <main id="stage" class="stage">
+        <div class="stage-tabs" role="tablist" aria-label="预览图层">
+          <button id="originalTab" class="active" type="button" role="tab" aria-selected="true">原始</button>
+          <button id="resultTab" type="button" role="tab" aria-selected="false">结果 <i id="resultDot"></i></button>
+        </div>
+        <div id="dropZone" class="canvas-viewport">
+          <div id="emptyState" class="empty-state">
+            <div class="upload-cube"><span>▧</span><i></i></div>
+            <h2>上传像素画</h2>
+            <p>点击或拖放图片到这里</p>
+            <span>支持 PNG / JPG / WEBP / GIF / SVG · 文件仅在本机处理</span>
+            <button id="emptyUploadButton" type="button">选择图片</button>
+            <button id="demoButton" type="button">载入示例</button>
+          </div>
+          <div id="canvasScene" class="canvas-scene" hidden>
+            <div id="canvasBackdrop" class="canvas-backdrop solid">
+              <canvas id="displayCanvas" aria-label="像素画预览"></canvas>
+              <canvas id="gridCanvas" aria-hidden="true"></canvas>
+            </div>
+            <div id="pixelTooltip" class="pixel-tooltip" hidden></div>
+          </div>
+          <div id="dropOverlay" class="drop-overlay" hidden><span>＋</span><strong>释放以导入像素画</strong></div>
+        </div>
+        <div class="zoom-controls">
+          <button id="zoomIn" type="button" title="放大">＋</button>
+          <button id="zoomReset" type="button" title="适应画布 · 滚轮缩放 · 按住滚轮拖动"><span id="zoomLabel">100%</span></button>
+          <button id="zoomOut" type="button" title="缩小">−</button>
+        </div>
+        <div id="imageMeta" class="image-meta">未载入图片</div>
+      </main>
+
+      <aside id="analysisPanel" class="analysis-panel">
+        <button id="collapseAnalysis" class="panel-handle right-handle" type="button" title="收起分析面板">›</button>
+        <div class="analysis-scroll">
+          <div class="export-grid">
+            <button id="exportButton" class="export-button primary" type="button" disabled><span>⇩</span> 导出 PNG</button>
+            <button id="exportOnePxButton" class="export-button" type="button" disabled><span>▧</span> 导出 1px</button>
+          </div>
+
+          <div class="grid-settings">
+            <label class="check-label"><input id="gridToggle" type="checkbox" checked><span class="fake-check"></span>网格</label>
+            <input id="gridColor" type="color" value="#22d3ee" title="网格颜色">
+            <input id="gridOpacity" class="range" type="range" min="0.05" max="0.8" step="0.05" value="0.25" title="网格透明度">
+          </div>
+
+          <section id="paletteSection" class="analysis-section">
+            <div class="analysis-title"><span>调色板</span><small>实时分析</small></div>
+            <div class="stat-card chamfer">
+              <span>总颜色数</span>
+              <strong id="totalColors">0</strong>
+              <small id="paletteDelta">等待图片</small>
+            </div>
+            <div class="subheading"><span>Top 100 常见色</span><button id="copyPaletteButton" type="button" disabled>复制 HEX</button></div>
+            <div id="paletteList" class="palette-list"><div class="empty-analysis">无颜色数据</div></div>
+            <div class="stack-actions">
+              <button id="downloadPaletteButton" type="button" disabled>⇩ 下载调色板 JSON / GPL</button>
+              <button id="exportPaletteImageButton" type="button" disabled>▧ 导出调色板图片 PNG</button>
+            </div>
+          </section>
+
+          <section id="gridSection" class="analysis-section">
+            <div class="analysis-title"><span>网格信息</span><small id="cellSizeBadge">AUTO</small></div>
+            <div class="grid-stat-card chamfer">
+              <div><strong id="gridCols">−</strong><span>列数</span></div>
+              <div><strong id="gridRows">−</strong><span>行数</span></div>
+              <div><strong id="gridCellSize">−</strong><span>像素格</span></div>
+            </div>
+            <div class="subheading"><span>方块统计</span><span id="blockCount">0</span></div>
+            <div id="blockStats" class="block-stats"><div class="empty-analysis">无方块数据</div></div>
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="helpDialog" class="help-dialog">
+      <button class="dialog-close" type="button" data-close-dialog>×</button>
+      <div class="dialog-icon">✦</div>
+      <h2>本地像素优化工作流</h2>
+      <ol>
+        <li><b>导入图片</b><span>图片只会进入浏览器内存与本地历史，不会上传。</span></li>
+        <li><b>调整流程</b><span>色彩量化合并近似色，区域检测清理小色块，指定色数压缩调色板。</span></li>
+        <li><b>检查并导出</b><span>通过网格、调色板和 Sprite 统计检查结果，再导出 PNG 或 1px 版本。</span></li>
+      </ol>
+      <p>提示：开启“吸管抠图”后点击画布，可移除相近背景色；描边会基于透明边缘生成。</p>
+    </dialog>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

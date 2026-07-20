@@ -11,8 +11,8 @@
   const resultContext = resultCanvas.getContext("2d", { willReadFrequently: true });
   const displayCanvas = $("#displayCanvas");
   const displayContext = displayCanvas.getContext("2d", { alpha: true });
-  const gridCanvas = $("#gridCanvas");
-  const gridContext = gridCanvas.getContext("2d");
+  const gridOverlay = $("#gridOverlay");
+  const gridPath = $("#gridPath");
   const dropZone = $("#dropZone");
   const canvasScene = $("#canvasScene");
 
@@ -728,11 +728,9 @@
     const scale = state.fitScale * state.zoom;
     const cssWidth = Math.max(1, Math.round(data.width * scale));
     const cssHeight = Math.max(1, Math.round(data.height * scale));
-    [displayCanvas, gridCanvas].forEach(canvas => {
-      canvas.style.width = `${cssWidth}px`;
-      canvas.style.height = `${cssHeight}px`;
-    });
-    gridCanvas.width = data.width; gridCanvas.height = data.height;
+    displayCanvas.style.width = `${cssWidth}px`;
+    displayCanvas.style.height = `${cssHeight}px`;
+    gridOverlay.setAttribute("viewBox", `0 0 ${data.width} ${data.height}`);
     $("#canvasBackdrop").style.width = `${cssWidth}px`;
     $("#canvasBackdrop").style.height = `${cssHeight}px`;
     applyPanTransform();
@@ -741,19 +739,32 @@
   }
 
   function renderGrid() {
-    gridContext.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+    gridPath.setAttribute("d", "");
     if (!state.originalData || !$("#gridToggle").checked) return;
-    const cell = Math.max(1, currentCellSize());
-    const scale = state.fitScale * state.zoom;
-    if (scale * cell < 4) return;
-    const color = hexToRgb($("#gridColor").value);
-    const opacity = Number($("#gridOpacity").value);
-    gridContext.strokeStyle = `rgba(${color.r},${color.g},${color.b},${opacity})`;
-    gridContext.lineWidth = Math.max(.25, 1 / scale);
-    gridContext.beginPath();
-    for (let x = cell; x < gridCanvas.width; x += cell) { gridContext.moveTo(x, 0); gridContext.lineTo(x, gridCanvas.height); }
-    for (let y = cell; y < gridCanvas.height; y += cell) { gridContext.moveTo(0, y); gridContext.lineTo(gridCanvas.width, y); }
-    gridContext.stroke();
+    const data = currentData();
+    if (!data) return;
+    const manualCell = Math.max(1, currentCellSize());
+    const cols = state.mode === "auto"
+      ? Math.max(1, state.detectedGridCols)
+      : Math.max(1, Math.ceil(data.width / manualCell));
+    const rows = state.mode === "auto"
+      ? Math.max(1, state.detectedGridRows)
+      : Math.max(1, Math.ceil(data.height / manualCell));
+    const xStep = data.width / cols;
+    const yStep = data.height / rows;
+    const coordinate = value => Number(value.toFixed(4));
+    const commands = [];
+    for (let col = 0; col <= cols; col++) {
+      const x = coordinate(col === cols ? data.width : col * xStep);
+      commands.push(`M${x} 0V${data.height}`);
+    }
+    for (let row = 0; row <= rows; row++) {
+      const y = coordinate(row === rows ? data.height : row * yStep);
+      commands.push(`M0 ${y}H${data.width}`);
+    }
+    gridPath.setAttribute("d", commands.join(""));
+    gridPath.setAttribute("stroke", $("#gridColor").value);
+    gridPath.setAttribute("stroke-width", $("#gridWidth").value);
   }
 
   function countColors(imageData, topLimit = 100) {
@@ -1191,7 +1202,7 @@
     syncTextColor($("#previewColor"), $("#previewColorText"), applyBackgroundChoice);
     syncTextColor($("#outlineColor"), $("#outlineColorText"));
 
-    ["#gridToggle", "#gridColor", "#gridOpacity"].forEach(selector => $(selector).addEventListener("input", renderGrid));
+    ["#gridToggle", "#gridColor", "#gridWidth"].forEach(selector => $(selector).addEventListener("input", renderGrid));
     $("#zoomIn").addEventListener("click", () => setZoom(state.zoom * 1.35));
     $("#zoomOut").addEventListener("click", () => setZoom(state.zoom / 1.35));
     $("#zoomReset").addEventListener("click", resetZoom);

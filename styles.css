@@ -1339,6 +1339,73 @@ body.graphite {
   --pink: #d7aeb8;
 }
 
+/* Readable type scale: keep tertiary information legible on common displays. */
+body { font-size: 14px; line-height: 1.45; }
+.brand-name { font-size: 17px; }
+.brand-sub { font-size: 11px; }
+.nav-item { font-size: 13px; }
+.local-badge,
+.icon-text-button { font-size: 11px; }
+.rail-head { font-size: 13px; }
+.empty-rail p { font-size: 12px; }
+.history-card strong { font-size: 12px; }
+.history-card span span,
+.folder-status { font-size: 11px; }
+.panel-heading small,
+.panel-heading > span { font-size: 11px; }
+.panel-heading h2 { font-size: 20px; }
+.upload-strip { font-size: 12px; }
+.segmented button,
+.section-kicker,
+.section-title,
+.check-label { font-size: 12px; }
+.value-note,
+.section-title strong,
+.hot-value,
+.warm-value,
+.pink-value { font-size: 11px; }
+.preset-grid button,
+.inline-pair label,
+.inline-pair input,
+.color-row input[type="text"] { font-size: 11px; }
+.micro-info,
+.process-status { font-size: 11px; }
+.primary-action { font-size: 12px; }
+.secondary-action,
+.radio-group label,
+.color-row { font-size: 11px; }
+.stage-title span { font-size: 13px; }
+.stage-title small { font-size: 11px; }
+.stage-tabs button { font-size: 11px; }
+.empty-state h2 { font-size: 21px; }
+.empty-state p { font-size: 13px; }
+.empty-state > span,
+.empty-state button { font-size: 11px; }
+.pixel-tooltip,
+#zoomReset { font-size: 11px; }
+.image-meta { font-size: 11px; }
+.analysis-mode-banner,
+.analysis-title { font-size: 12px; }
+.analysis-mode-banner small,
+.analysis-title small { font-size: 11px; }
+.export-button,
+.stat-card span,
+.subheading,
+.palette-chip,
+.empty-analysis,
+.stack-actions button { font-size: 11px; }
+.stat-card small,
+.subheading button,
+.grid-stat-card span,
+.block-row { font-size: 11px; }
+.grid-stat-card strong { font-size: 17px; }
+.toast { font-size: 11px; }
+.help-dialog h2 { font-size: 22px; }
+.help-dialog li::before { font-size: 11px; }
+.help-dialog li b { font-size: 13px; }
+.help-dialog li span { font-size: 12px; }
+.help-dialog p { font-size: 11px; }
+
 @keyframes pulse { 50% { opacity: .35; transform: scale(.7); } }
 
 @media (max-width: 1500px) {
@@ -1376,7 +1443,7 @@ body.graphite {
   .analysis-panel { right: 12px; }
   .stage { width: 100%; min-width: 0; }
   .topbar { grid-template-columns: auto minmax(0, 1fr) auto; padding: 0 14px; }
-  .nav-item { padding: 0 9px; font-size: 10px; }
+  .nav-item { padding: 0 9px; font-size: 12px; }
 }
 
 @media (max-width: 760px) {
@@ -1420,7 +1487,7 @@ body.graphite {
 }
 
 @media (max-width: 520px) {
-  .brand-name { font-size: 13px; }
+  .brand-name { font-size: 15px; }
   .brand-mark { width: 27px; height: 27px; }
   .stage-title { display: none; }
   .stage-tabs button { min-width: 70px; }

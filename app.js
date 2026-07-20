@@ -1130,6 +1130,20 @@
       setTimeout(renderDisplay, 260);
     };
 
+    const collapsePanel = (panel, handle, collapsedGlyph) => {
+      if (panel.classList.contains("collapsed")) return;
+      panel.classList.add("collapsed");
+      handle.textContent = collapsedGlyph;
+      setTimeout(renderDisplay, 260);
+    };
+
+    const setPaletteMode = enabled => {
+      $("#analysisPanel").classList.toggle("palette-mode", enabled);
+      if (!enabled) $(".analysis-scroll").scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const useOverlayPanels = () => window.matchMedia("(max-width: 780px)").matches;
+
     const focusPanelTarget = (navItem, panel, handle, expandedGlyph, target) => {
       activateTopNav(navItem);
       expandPanel(panel, handle, expandedGlyph);
@@ -1165,6 +1179,8 @@
 
     $("#atlasToggle").addEventListener("change", () => {
       updateAtlasSummary();
+      setPaletteMode(false);
+      if (useOverlayPanels()) collapsePanel($("#analysisPanel"), $("#collapseAnalysis"), "‹");
       activateTopNav($("#atlasToggle").checked ? atlasNavItem : optimizerNavItem);
     });
     ["#atlasCols", "#atlasRows"].forEach(selector => $(selector).addEventListener("change", updateAtlasSummary));
@@ -1314,15 +1330,22 @@
     optimizerNavItem.addEventListener("click", () => {
       $("#atlasToggle").checked = false;
       updateAtlasSummary();
+      setPaletteMode(false);
+      if (useOverlayPanels()) collapsePanel($("#analysisPanel"), $("#collapseAnalysis"), "‹");
       focusPanelTarget(optimizerNavItem, $("#controlPanel"), $("#collapseControl"), "‹", $("#uploadButton"));
     });
     atlasNavItem.addEventListener("click", () => {
       $("#atlasToggle").checked = true;
       updateAtlasSummary();
+      setPaletteMode(false);
+      if (useOverlayPanels()) collapsePanel($("#analysisPanel"), $("#collapseAnalysis"), "‹");
       focusPanelTarget(atlasNavItem, $("#controlPanel"), $("#collapseControl"), "‹", $("#atlasToggle").closest(".switch-row"));
     });
     paletteNavItem.addEventListener("click", () => {
+      setPaletteMode(true);
+      if (useOverlayPanels()) collapsePanel($("#controlPanel"), $("#collapseControl"), "›");
       focusPanelTarget(paletteNavItem, $("#analysisPanel"), $("#collapseAnalysis"), "›", $("#paletteSection"));
+      showToast(state.originalData ? `已提取 ${state.palette.length} 个主要颜色` : "导入图片后会自动提取调色板");
     });
     helpNavItem.addEventListener("click", () => {
       activateTopNav(helpNavItem, false);

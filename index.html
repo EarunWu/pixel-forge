@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="完全在浏览器本地运行的像素画优化、调色板提取与精灵图集分析工具。">
   <title>PIXEL FORGE · 本地像素优化</title>
-  <link rel="stylesheet" href="styles.css?v=20260720-tabs">
+  <link rel="stylesheet" href="styles.css?v=20260720-palette">
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -209,6 +209,11 @@
       <aside id="analysisPanel" class="analysis-panel">
         <button id="collapseAnalysis" class="panel-handle right-handle" type="button" title="收起分析面板">›</button>
         <div class="analysis-scroll">
+          <div class="analysis-mode-banner" aria-hidden="true">
+            <span>◈ 调色板分析</span>
+            <small>当前预览 · 自动提取</small>
+          </div>
+
           <div class="export-grid">
             <button id="exportButton" class="export-button primary" type="button" disabled><span>⇩</span> 导出 PNG</button>
             <button id="exportOnePxButton" class="export-button" type="button" disabled><span>▧</span> 导出 1px</button>
@@ -228,7 +233,7 @@
               <small id="paletteDelta">等待图片</small>
             </div>
             <div class="subheading"><span>Top 100 常见色</span><button id="copyPaletteButton" type="button" disabled>复制 HEX</button></div>
-            <div id="paletteList" class="palette-list"><div class="empty-analysis">无颜色数据</div></div>
+            <div id="paletteList" class="palette-list"><div class="empty-analysis">导入图片后自动提取高频颜色</div></div>
             <div class="stack-actions">
               <button id="downloadPaletteButton" type="button" disabled>⇩ 下载调色板 JSON / GPL</button>
               <button id="exportPaletteImageButton" type="button" disabled>▧ 导出调色板图片 PNG</button>
@@ -263,6 +268,6 @@
       <p>提示：开启“吸管抠图”后点击画布，可移除相近背景色；描边会基于透明边缘生成。</p>
     </dialog>
   </div>
-  <script src="app.js?v=20260720-tabs2"></script>
+  <script src="app.js?v=20260720-palette"></script>
 </body>
 </html>
